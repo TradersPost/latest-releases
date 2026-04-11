@@ -1,9 +1,10 @@
 # Table of contents
 
-* [March 25th, 2026](README.md)
+* [April 11th, 2026](README.md)
 
 ## Old Releases
 
+* [March 25th, 2026](old-releases/march-25th-2026.md)
 * [March 21st, 2026](old-releases/march-21st-2026.md)
 * [March 12th, 2026](old-releases/march-12th-2026.md)
 * [March 7th, 2026](old-releases/march-7th-2026.md)
