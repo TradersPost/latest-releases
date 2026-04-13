@@ -30,7 +30,8 @@ We've introduced a new action, `breakeven`, for sending signals to TradersPost. 
 ```json
 {
     "ticker": "SPY",
-    "action": "breakeven"
+    "action": "breakeven",
+    "orderType": "limit"
 }
 ```
 
