@@ -31,7 +31,7 @@ We've introduced a new action, `breakeven`, for sending signals to TradersPost. 
 {
     "ticker": "SPY",
     "action": "breakeven",
-    "orderType": "limit"
+    "orderType": "stop"
 }
 ```
 
