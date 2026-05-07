@@ -1,87 +1,48 @@
-# April 17th, 2026
+# May 2nd, 2025
 
-### Improved Brokers Page
+### Reject stale signals for entries and exits
 
-We've improved the Brokers page to make it easier and faster to manage large numbers of broker connections.
+You can now prevent trades from executing if a signal is too old. Configure a maximum age (in seconds) for both entries and exits, and TradersPost will ignore signals that exceed this threshold after any configured delay.
 
-* Added search to quickly find broker connections by name or broker
-* Improved performance for customers with a large number of broker connections
-* Reduced loading time and improved responsiveness when viewing or filtering connections
+The staleness check uses the webhook `time` (if provided) or the receive time by default, helping protect against delayed alerts from TradingView or other systems. You can also allow per-signal overrides using `rejectAfter` in the webhook payload.
 
-<figure><img src=".gitbook/assets/Screenshot 2026-04-17 at 11.37.13 PM.png" alt=""><figcaption></figcaption></figure>
+This gives you tighter control over execution timing and helps avoid entering or exiting positions based on outdated signals.
 
-### IBKR Connection Reliability
-
-We've added a new experimental option to help improve connection reliability with Interactive Brokers.
-
-TradersPost infrastructure uses multiple outbound IP addresses for redundancy and reliability. Because of this, requests sent to Interactive Brokers may come from different IP addresses over time.
-
-Interactive Brokers has informed us that their API expects requests for a trading session to consistently come from the same IP address. When requests come from different IP addresses, it can cause reliability issues or failed requests.
-
-You can now enable the new **HTTP Proxy** option on your Interactive Brokers connection. When enabled, all traffic for that connection will be routed through an HTTP proxy with a single static IP address.
-
-This feature is currently optional and experimental while we evaluate whether it improves Interactive Brokers connection reliability.
-
-<figure><img src=".gitbook/assets/Screenshot 2026-04-17 at 11.40.01 PM.png" alt=""><figcaption></figcaption></figure>
-
-### PnL-Based Take Profit and Stop Loss
-
-You can now configure take profit and stop loss levels based on a desired profit or loss amount instead of a price, percent, or dollar offset.
-
-TradersPost automatically converts the desired PnL amount into the correct take profit limit price or stop loss stop price before the order is sent to the broker.
-
-The calculated price is based on:
-
-* The planned entry price
-* The quantity being traded
-* The symbol's point value
-
-For example:
-
-* Futures use the dollar value per point for the contract
-* Standard equity options use the contract multiplier, typically 100 per contract
-
-<figure><img src=".gitbook/assets/Screenshot 2026-04-17 at 11.39.21 PM.png" alt=""><figcaption></figcaption></figure>
-
-#### Take Profit PnL Amount
-
-Use the **Take profit PnL amount** field to set a portfolio profit target in dollars.
-
-For example, if you enter `$200`, TradersPost will calculate the take profit limit price required to generate approximately $200 of profit based on the quantity and point value of the symbol.
-
-You can also send a PnL-based take profit directly in your webhook using `takeProfit.pnlAmount`:
+**Example webhook payload**
 
 ```json
 {
-    "ticker": "AAPL",
+    "ticker": "SPY",
     "action": "buy",
-    "orderType": "limit",
-    "limitPrice": 100,
-    "takeProfit": {
-        "pnlAmount": 100
-    }
+    "orderType": "market",
+    "time": "2026-04-23 10:00:00",
+    "rejectAfter": 10
 }
 ```
 
-#### Stop Loss PnL Amount
+### Improved subscription flow
 
-You can also configure a stop loss based on a desired dollar loss.
+Subscribing to a strategy is now faster and more intuitive with a streamlined 3-step flow:
 
-Use the **Stop loss PnL amount** field to specify the maximum loss amount you are willing to take on the position.
+1. **Choose Strategy** – Select the strategy you want to subscribe to.
+2. **Choose Account** – Pick the account you want to connect to the strategy.
+3. **Confirm** – Review your selections and create the subscription.
 
-For example, if you enter `$100`, TradersPost will calculate the stop loss stop price required to limit the position to approximately $100 of loss based on the quantity and point value of the symbol.
+This updated flow makes it easier to understand what you’re connecting and reduces friction when getting started with a new strategy.
 
-You can also send a PnL-based stop loss directly in your webhook using `stopLoss.pnlAmount`:
+<div><figure><img src=".gitbook/assets/Screenshot 2026-05-07 at 8.43.56 AM.png" alt=""><figcaption></figcaption></figure> <figure><img src=".gitbook/assets/Screenshot 2026-05-07 at 8.44.15 AM.png" alt=""><figcaption></figcaption></figure> <figure><img src=".gitbook/assets/Screenshot 2026-05-07 at 8.44.21 AM.png" alt=""><figcaption></figcaption></figure></div>
 
-```json
-{
-    "ticker": "AAPL",
-    "action": "buy",
-    "orderType": "limit",
-    "limitPrice": 100,
-    "stopLoss": {
-        "type": "stop",
-        "pnlAmount": 100
-    }
-}
-```
+### Wait to start trial until first trade
+
+Free trials can now begin only after your first trade is submitted.
+
+New accounts that are eligible for a free trial will start in a waiting state, so the trial clock does not begin immediately. The trial automatically starts when your first qualifying trade is submitted through a connected third-party broker.
+
+This ensures your trial time is used while you are actively trading, instead of expiring before you’ve had a chance to use the platform.
+
+**How it works:**
+
+* Trial remains in a waiting state until your first trade
+* Only trades submitted to third-party brokers count (TradersPost Paper trades are excluded)
+* Trial starts automatically on the first qualifying trade
+* No change if the trial is already started, paused, or the account is on a paid or complimentary plan
